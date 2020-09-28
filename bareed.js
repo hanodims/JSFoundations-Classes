@@ -47,15 +47,9 @@ class Wallet {
     this.money = money;
   }
 
-  credit = amount => {
-    this.money = amount + this.money
-    return this.money
-  };
+  credit = (amount) => (this.money += amount);
 
-  debit = amount => {
-    this.money = this.money - amount
-    return this.money
-  };
+  debit = (amount) => (this.money -= amount);
 }
 
 /**********************************************************
@@ -70,17 +64,13 @@ class Wallet {
  * let person = new Person(name, x, y);
  **********************************************************/
 class Person {
-  constructor(name,x,y, wallet=0) {
+  constructor(name,x,y) {
     this.name = name;
-    this.wallet = new Wallet(wallet)
-    this.location = new Point(this.x,this.y)
+    this.wallet = new Wallet();
+    this.location = new Point(x,y);
    
   }
-  moveTo = point => {
-    let x = point.x;
-    let y = point.y;
-    return this.location = new Point(x, y)
-  };
+  moveTo = (point) => (this.location = point);
 
 }
 
@@ -100,16 +90,14 @@ class Person {
  * new vendor = new Vendor(name, x, y);
  **********************************************************/
 class Vendor extends Person {
-  constructor(name,x,y,wallet=0,range=5,price=1){
-    super(name,x,y,wallet=0)
-    this.range = range
-    this.price = price
-  }
+    range = 5;
+    price = 1;
+  
   sellTo = (customer, numberOfIceCreams) => {
-    let customerLOcation = moveTo(customer.location)
-    let total = numberOfIceCreams * this.price
-    customer.wallet = customer.wallet.debit(total)
-    this.wallet = this.wallet.credit(total)
+    this.moveTo(customer.location);
+    let total = numberOfIceCreams * this.price;
+    customer.wallet.debit(total);
+    this.wallet.credit(total);
   };
 }
 
@@ -130,31 +118,17 @@ class Vendor extends Person {
  * new customer = new Customer(name, x, y);
  **********************************************************/
 class Customer extends Person {
-  constructor(name,x,y,wallet=0,range=5,price=1){
-    super(name,x,y,wallet=0)
-    this.wallet = 10
+  constructor(name,x,y){
+    super(name,x,y);
+    this.wallet.credit(10);
   }
-  _isInRange = (vendor) => {
-    let found = false
-    let customerRange = distanceTo(this.location)
-    if (customerRange <= this.range){
-      found = true
-    }
-    return found
-  };
+  _isInRange = (vendor) =>  this.location.distanceTo(vendor.location) <= vendor.range;
 
-  _haveEnoughMoney = (vendor, numberOfIceCreams) => {
-    let found = false
-    let total = vendor.price * umberOfIceCreams
-    if (total >= this.wallet){
-      found = true
-    }
-    return found
-  };
+  _haveEnoughMoney = (vendor, numberOfIceCreams) => this.wallet.money >= vendor.price * numberOfIceCreams;
 
   requestIceCream = (vendor, numberOfIceCreams) => {
-   if (this._isInRange && this._haveEnoughMoney){
-     vendor.sellTo(this,numberOfIceCreams)
+   if (this._isInRange(vendor) &&this._haveEnoughMoney(vendor, numberOfIceCreams)) {
+     vendor.sellTo(this,numberOfIceCreams);
    }
   };
 
